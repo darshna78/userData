@@ -32,26 +32,33 @@
 
                 const uid =  Date.now().toString(36) + Math.random().toString(36).substr(2);
                 console.log(uid);
-
+                var urlParams = new URLSearchParams(window.location.search);
+                      var id = urlParams.get("id");
                
-                const responseLinks = await fetch('https://test-prod-api.dubuddy.in/auth/public/installAnalysis/getInstallationLinkById?id=1')
+                const responseLinks = await fetch(`https://test-prod-api.dubuddy.in/auth/public/installAnalysis/getInstallationLinkById?id=1`)
                 const responseData = await responseLinks.json();
                 const dataLinks = responseData.data;
                 const install_refferer = dataLinks.install_refferer;
                 const iosInstallLink = dataLinks.iosInstallLink;
                 const androidInstallLink = dataLinks.androidInstallLink;
                 const desktopInstallLink = dataLinks.desktopInstallLink;
-                console.log(install_refferer,iosInstallLink,androidInstallLink,desktopInstallLink);
-                console.log(userIP,deviceId,platform,uid,install_refferer);
+                 console.log(dataLinks);
 
+               
                 const postDataResponse = await postData('https://test-prod-api.dubuddy.in/auth/public/installAnalysis/addUserSnapshot', {
                      ip_address: userIP,
                      deviceId: deviceId,
-                     platform: platform,
+                     platform: "WEB",
                      uniqueId: uid, 
                      install_refferer: install_refferer
                 });
-
+                
+               console.log(
+                {ip_address: userIP,
+                     deviceId: deviceId,
+                     platform: platform,
+                     uniqueId: uid, 
+                     install_refferer: install_refferer});
                 console.log(postDataResponse);
                    
                 if (postDataResponse.status) {
@@ -71,17 +78,25 @@
             }
         }
 
-        function getPlatform() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            console.log(userAgent);
-            if (userAgent.includes('android')) {
-                return 'ANDROID';
-            } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
-                return 'IOS';
-            } else if (userAgent.includes('web')) {
-                return 'WEB';
-            }
-        }
+function getPlatform() {
+ const platform = navigator.platform.toLowerCase();
+    
+    if (platform.includes('win')) {
+        return 'WEB';
+    } else if (platform.includes('mac')) {
+        return 'WEB';
+    } else if (platform.includes('linux')) {
+        return 'WEB';
+    } else if (platform.includes('iphone') || platform.includes('ipad') || platform.includes('ipod')) {
+        return 'IOS';
+    } else if (platform.includes('android')) {
+        return 'ANDROID';
+    } else {
+        return 'Unknown';
+    }
+}
+
+        
         function generateDeviceId() {
             const timestamp = Date.now();
             const userAgent = navigator.userAgent;
@@ -110,7 +125,6 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdGF0dXMiOiJVTkJMT0NLRUQiLCJpZCI6MzEsIm1vYmlsZSI6IiQyYiQxMCQvWnp1NDBnMG14UWxBblAyTmZ0dVBPUnlWMGVnMGg5NmRkM1lXeXdneVZPam5xL2FoSngweSIsInVzZXJUeXBlIjoiQURNSU4iLCJ1cGRhdGVkQXQiOiIyMDI0LTAzLTI3VDA3OjM1OjAyLjk2M1oiLCJjcmVhdGVkQXQiOiIyMDI0LTAzLTI3VDA3OjM1OjAyLjk2M1oiLCJpYXQiOjE3MTE1MjQ5MDIsImV4cCI6MTcxNDE1MjkwMiwiaXNzIjoiRFVCdWRkeSJ9.AXHOBa1Ftzvqcgklar0LwZQGKwMX0wgrzebdJ8wXOMo'
                 },
                 body: JSON.stringify(data)
             });
