@@ -48,7 +48,7 @@
                 const postDataResponse = await postData('https://test-prod-api.dubuddy.in/auth/public/installAnalysis/addUserSnapshot', {
                      ip_address: userIP,
                      deviceId: deviceId,
-                     platform: "WEB",
+                     platform: platform,
                      uniqueId: uid, 
                      install_refferer: install_refferer
                 });
@@ -78,23 +78,28 @@
             }
         }
 
-function getPlatform() {
- const platform = navigator.platform.toLowerCase();
-    
-    if (platform.includes('win')) {
-        return 'WEB';
+        function getPlatform() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const platform = navigator.platform.toLowerCase();
+
+    if (userAgent.includes('android')) {
+        return 'Android';
+    } else if (userAgent.includes('iphone') || userAgent.includes('ipad') || userAgent.includes('ipod')) {
+        return 'iOS';
+    } else if (platform.includes('win')) {
+        return 'Windows';
     } else if (platform.includes('mac')) {
-        return 'WEB';
+        return 'MacOS';
     } else if (platform.includes('linux')) {
-        return 'WEB';
-    } else if (platform.includes('iphone') || platform.includes('ipad') || platform.includes('ipod')) {
-        return 'IOS';
-    } else if (platform.includes('android')) {
-        return 'ANDROID';
+        return 'Linux';
     } else {
         return 'Unknown';
     }
 }
+
+const platform = getPlatform();
+console.log('Platform:', platform);
+
 
         
         function generateDeviceId() {
