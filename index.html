@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data Collection</title>
+
+</head>
+<body>
+    <script>
+        async function fetchUserData() {
+            try {
+                const response = await fetch('https://ipinfo.io/json');
+                const data = await response.json();
+                
+                const userIP = data.ip;
+               
+                 console.log(userIP);
+
+                const platform = getPlatform();
+               console.log(platform);
+               
+
+                const deviceName = navigator.userAgent;
+                console.log(deviceName);
+
+                const screenSize = `${window.screen.width}x${window.screen.height}`;
+               console.log(screenSize)
+
+                const deviceId = generateDeviceId(); 
+                console.log(deviceId)
+
+                const uid =  Date.now().toString(36) + Math.random().toString(36).substr(2);
+                console.log(uid);
+
+               
+                const responseLinks = await fetch('https://test-prod-api.dubuddy.in/auth/public/installAnalysis/getInstallationLinkById?id=1')
+                const responseData = await responseLinks.json();
+                const dataLinks = responseData.data;
+                const install_refferer = dataLinks.install_refferer;
+                const iosInstallLink = dataLinks.iosInstallLink;
+                const androidInstallLink = dataLinks.androidInstallLink;
+                const desktopInstallLink = dataLinks.desktopInstallLink;
+                console.log(install_refferer,iosInstallLink,androidInstallLink,desktopInstallLink);
+                console.log(userIP,deviceId,platform,uid,install_refferer);
+
+                const postDataResponse = await postData('https://test-prod-api.dubuddy.in/auth/public/installAnalysis/addUserSnapshot', {
+                     ip_address: userIP,
+                     deviceId: deviceId,
+                     platform: platform,
+                     uniqueId: uid, 
+                     install_refferer: install_refferer
+                });
+
+                console.log(postDataResponse);
+                   
+                if (postDataResponse.status) {
+                    console.log('User data posted successfully');
+                    if (platform === 'ANDROID') {
+                        window.location = androidInstallLink;
+                    } else if (platform === 'IOS') {
+                        window.location = iosInstallLink;
+                    } else if (platform === 'WEB') {
+                        window.location = desktopInstallLink;
+                    }
+                } else {
+                    console.log('Failed to save user data:', postDataResponse.error);
+                }
+            } catch (error) {
+                console.log('Error:', error);
+            }
+        }
+
+        function getPlatform() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            console.log(userAgent);
+            if (userAgent.includes('android')) {
+                return 'ANDROID';
+            } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+                return 'IOS';
+            } else if (userAgent.includes('web')) {
+                return 'WEB';
+            }
+        }
+        function generateDeviceId() {
+            const timestamp = Date.now();
+            const userAgent = navigator.userAgent;
+            const screenResolution = `${window.screen.width}x${window.screen.height}`;
+            const combinedString = `${timestamp}-${userAgent}-${screenResolution}`;
+            return hashString(combinedString);
+        }
+
+
+        function hashString(str) {
+            let hash = 0;
+            if (str.length === 0) {
+                return hash;
+            }
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; 
+            }
+            return hash.toString(36);
+        }
+
+
+        async function postData(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdGF0dXMiOiJVTkJMT0NLRUQiLCJpZCI6MzEsIm1vYmlsZSI6IiQyYiQxMCQvWnp1NDBnMG14UWxBblAyTmZ0dVBPUnlWMGVnMGg5NmRkM1lXeXdneVZPam5xL2FoSngweSIsInVzZXJUeXBlIjoiQURNSU4iLCJ1cGRhdGVkQXQiOiIyMDI0LTAzLTI3VDA3OjM1OjAyLjk2M1oiLCJjcmVhdGVkQXQiOiIyMDI0LTAzLTI3VDA3OjM1OjAyLjk2M1oiLCJpYXQiOjE3MTE1MjQ5MDIsImV4cCI6MTcxNDE1MjkwMiwiaXNzIjoiRFVCdWRkeSJ9.AXHOBa1Ftzvqcgklar0LwZQGKwMX0wgrzebdJ8wXOMo'
+                },
+                body: JSON.stringify(data)
+            });
+            return response.json();
+        }
+
+        window.onload = fetchUserData;
+    </script>
+</body>
+</html>
