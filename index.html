@@ -83,9 +83,9 @@
     const platform = navigator.platform.toLowerCase();
 
     if (userAgent.includes('android')) {
-        return 'Android';
+        return 'ANDROID';
     } else if (userAgent.includes('iphone') || userAgent.includes('ipad') || userAgent.includes('ipod')) {
-        return 'iOS';
+        return 'IOS';
     } else if (platform.includes('win')) {
         return 'WEB';
     } else if (platform.includes('mac')) {
